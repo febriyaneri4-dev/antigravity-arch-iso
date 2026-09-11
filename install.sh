@@ -52,8 +52,8 @@ mkdir -p /mnt/boot/efi
 mount "${PART_PREFIX}1" /mnt/boot/efi
 
 echo "==> Installing base system and packages..."
-# Read the packages list we bundled into the ISO
-pacstrap -K /mnt - < /root/packages.x86_64
+# Read the base packages from the ISO, and fetch the heavy GUI packages directly from the internet!
+pacstrap -K /mnt - < /root/packages.x86_64 base-devel linux-headers os-prober ntfs-3g neovim hyprland kitty waybar wofi sddm polkit-kde-agent nvidia-dkms nvidia-utils intel-ucode firefox gtk3 nss alsa-lib libxss xdg-utils fuse2
 
 echo "==> Generating fstab..."
 genfstab -U /mnt >> /mnt/etc/fstab
