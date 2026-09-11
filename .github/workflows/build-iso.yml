@@ -1,0 +1,47 @@
+name: Build Antigravity Arch ISO
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --privileged
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update system and install archiso
+        run: |
+          pacman -Syu --noconfirm archiso
+
+      - name: Prepare custom profile
+        run: |
+          # Copy the official releng profile to our workspace to serve as the base
+          cp -r /usr/share/archiso/configs/releng ./custom-profile
+          
+          # Inject our custom packages (append to the existing releng packages)
+          cat packages.x86_64 >> ./custom-profile/packages.x86_64
+          
+          # Inject our automated installation script into the Live ISO's /root/ directory
+          mkdir -p ./custom-profile/airootfs/root/
+          cp install.sh ./custom-profile/airootfs/root/install.sh
+          chmod +x ./custom-profile/airootfs/root/install.sh
+          
+          # Also copy the packages list so the install script can read it for pacstrap
+          cp packages.x86_64 ./custom-profile/airootfs/root/packages.x86_64
+
+      - name: Build ISO
+        run: |
+          mkarchiso -v -w /tmp/work -o /tmp/out ./custom-profile/
+
+      - name: Upload ISO Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Antigravity-Arch-Linux
+          path: /tmp/out/*.iso
+          retention-days: 7
