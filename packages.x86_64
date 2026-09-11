@@ -19,7 +19,7 @@ waybar
 wofi
 sddm
 polkit-kde-agent
-nvidia
+nvidia-dkms
 nvidia-utils
 intel-ucode
 firefox
