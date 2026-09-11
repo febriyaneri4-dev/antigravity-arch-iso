@@ -5,6 +5,9 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-iso:
     runs-on: ubuntu-latest
@@ -39,9 +42,12 @@ jobs:
         run: |
           mkarchiso -v -w /tmp/work -o /tmp/out ./custom-profile/
 
-      - name: Upload ISO Artifact
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release (Fast CDN Download)
+        uses: softprops/action-gh-release@v2
         with:
-          name: Antigravity-Arch-Linux
-          path: /tmp/out/*.iso
-          retention-days: 7
+          tag_name: latest-build
+          name: Antigravity Arch ISO (Latest)
+          files: /tmp/out/*.iso
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
